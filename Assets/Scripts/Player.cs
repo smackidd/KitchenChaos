@@ -6,10 +6,43 @@ using UnityEngine.EventSystems;
 public class Player : MonoBehaviour
 {
     private bool isWalking;
+    private Vector3 lastInteractDir;
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private GameInput gameInput;
 
     private void Update()
+    {
+        HandleMovement(); 
+        HandleInteractions();   
+    }
+
+    public bool IsWalking()
+    {
+        return isWalking;
+    }
+
+    private void HandleInteractions()
+    {
+        Vector2 inputVector = gameInput.GetMovementVectorNormalized();
+
+        Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
+
+        if (moveDir != Vector3.zero)
+        {
+            lastInteractDir = moveDir;
+        }
+
+        float interactDistance = 2f;
+        if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactDistance))
+        {
+            Debug.Log(raycastHit.transform);
+        } else
+        {
+            Debug.Log("-");
+        }
+    }
+
+    private void HandleMovement()
     {
         Vector2 inputVector = gameInput.GetMovementVectorNormalized();
 
@@ -31,7 +64,8 @@ public class Player : MonoBehaviour
             {
                 // Can move only on the X
                 moveDir = moveDirX;
-            } else
+            }
+            else
             {
                 // Cannot move only on the X
 
@@ -56,11 +90,5 @@ public class Player : MonoBehaviour
         isWalking = moveDir != Vector3.zero;
         float rotateSpeed = 10f;
         transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * rotateSpeed);
-
-    }
-
-    public bool IsWalking()
-    {
-        return isWalking;
     }
 }
